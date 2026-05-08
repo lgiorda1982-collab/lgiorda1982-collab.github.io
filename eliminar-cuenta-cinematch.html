@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eliminar cuenta — CineMatch</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: #fff;
+      max-width: 480px;
+      width: 100%;
+      padding: 36px 32px;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .logo { font-size: 26px; font-weight: bold; color: #e50914; margin-bottom: 4px; }
+    .logo span { color: #222; }
+    h1 { font-size: 20px; margin: 16px 0 8px; color: #222; }
+    p { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 20px; }
+    label { display: block; font-size: 13px; font-weight: bold; color: #333; margin-bottom: 6px; }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: Arial, sans-serif;
+      margin-bottom: 16px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: #e50914; }
+    textarea { resize: vertical; min-height: 80px; }
+    .warning {
+      background: #fff8e1;
+      border-left: 4px solid #f9a825;
+      padding: 12px 14px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #e50914;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    button:hover { background: #c0070f; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .success {
+      display: none;
+      text-align: center;
+      padding: 24px 0 8px;
+    }
+    .success .icon { font-size: 48px; margin-bottom: 12px; }
+    .success h2 { font-size: 18px; color: #222; margin-bottom: 8px; }
+    .success p { color: #666; font-size: 14px; }
+    .footer { font-size: 12px; color: #aaa; text-align: center; margin-top: 24px; }
+    .footer a { color: #aaa; }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <div class="logo">CINE<span>MATCH</span></div>
+
+    <div id="form-section">
+      <h1>Solicitud de eliminación de cuenta</h1>
+      <p>Completá el formulario y procesaremos tu solicitud en un plazo máximo de 30 días. Se eliminarán tu perfil, publicaciones, intereses y datos asociados.</p>
+
+      <div class="warning">
+        ⚠️ Esta acción es irreversible. Una vez eliminada tu cuenta no podrás recuperar tus datos.
+      </div>
+
+      <form id="delete-form">
+        <label for="email">Email de tu cuenta</label>
+        <input type="email" id="email" placeholder="tu@email.com" required>
+
+        <label for="motivo">Motivo (opcional)</label>
+        <select id="motivo">
+          <option value="">Preferiero no decir</option>
+          <option value="Ya no uso la app">Ya no uso la app</option>
+          <option value="Problemas con la app">Problemas con la app</option>
+          <option value="Preocupaciones de privacidad">Preocupaciones de privacidad</option>
+          <option value="Otro">Otro</option>
+        </select>
+
+        <label for="comentario">Comentario adicional (opcional)</label>
+        <textarea id="comentario" placeholder="Contanos más si querés..."></textarea>
+
+        <button type="submit" id="submit-btn">Solicitar eliminación de cuenta</button>
+      </form>
+    </div>
+
+    <div class="success" id="success-section">
+      <div class="icon">✅</div>
+      <h2>Solicitud recibida</h2>
+      <p>Te contactaremos a <strong id="email-confirmacion"></strong> para confirmar la eliminación de tu cuenta en un plazo de 30 días.</p>
+    </div>
+
+    <div class="footer">
+      <a href="privacidad-cinematch.html">Política de privacidad</a> &mdash; LG Ideas
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('delete-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+      const motivo = document.getElementById('motivo').value;
+      const comentario = document.getElementById('comentario').value.trim();
+      const btn = document.getElementById('submit-btn');
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      // Enviar via Formspree
+      const response = await fetch('https://formspree.io/f/xrejyqwd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          email: email,
+          motivo: motivo || 'No especificado',
+          comentario: comentario || 'Sin comentarios',
+          app: 'CineMatch (ar.com.cinematch)',
+          _subject: 'Solicitud de eliminación de cuenta - CineMatch'
+        })
+      });
+
+      if (response.ok) {
+        document.getElementById('form-section').style.display = 'none';
+        document.getElementById('success-section').style.display = 'block';
+        document.getElementById('email-confirmacion').textContent = email;
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Solicitar eliminación de cuenta';
+        alert('Hubo un error al enviar. Por favor escribinos directamente a lgiorda1982@gmail.com');
+      }
+    });
+  </script>
+
+</body>
+</html>
